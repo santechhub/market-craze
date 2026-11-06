@@ -26,17 +26,50 @@ export class HttpError extends Error {
   }
 }
 
+export class UpstreamError extends HttpError {
+  constructor(
+    public upstreamStatus: number,
+    host: string,
+  ) {
+    super(502, `Upstream ${host} returned ${upstreamStatus}`);
+  }
+}
+
 export async function getJson<T>(url: string): Promise<T> {
   const res = await fetch(url, { headers: { accept: "application/json" } });
-  if (!res.ok) throw new HttpError(502, `Upstream ${new URL(url).host} returned ${res.status}`);
+  if (!res.ok) throw new UpstreamError(res.status, new URL(url).host);
   return res.json() as Promise<T>;
+}
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+// Finnhub free tier allows 60 calls/min and 30 calls/sec. Space calls out and retry on 429.
+let nextSlot = 0;
+async function finnhubSlot() {
+  const now = Date.now();
+  const wait = Math.max(0, nextSlot - now);
+  nextSlot = Math.max(now, nextSlot) + 80; // ~12 calls/sec
+  if (wait) await sleep(wait);
 }
 
 export const FINNHUB = "https://finnhub.io/api/v1";
 export const FMP = "https://financialmodelingprep.com/stable";
 
-export const finnhub = <T>(path: string, params: Record<string, string>) =>
-  getJson<T>(`${FINNHUB}${path}?${new URLSearchParams({ ...params, token: env("FINNHUB_API_KEY") })}`);
+export async function finnhub<T>(path: string, params: Record<string, string>): Promise<T> {
+  const url = `${FINNHUB}${path}?${new URLSearchParams({ ...params, token: env("FINNHUB_API_KEY") })}`;
+  for (let attempt = 0; ; attempt++) {
+    await finnhubSlot();
+    try {
+      return await getJson<T>(url);
+    } catch (e) {
+      if (e instanceof UpstreamError && e.upstreamStatus === 429 && attempt < 3) {
+        await sleep(1200 * (attempt + 1));
+        continue;
+      }
+      throw e;
+    }
+  }
+}
 
 export const fmp = <T>(path: string, params: Record<string, string>) =>
   getJson<T>(`${FMP}${path}?${new URLSearchParams({ ...params, apikey: env("FMP_API_KEY") })}`);

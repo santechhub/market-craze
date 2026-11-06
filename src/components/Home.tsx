@@ -56,6 +56,7 @@ export default function Home({ tab }: { tab: Tab }) {
               <h2>
                 <span aria-hidden>{c.emoji}</span> {c.name}
               </h2>
+              {c.top.length === 0 && <p className="muted small">Prices didn't load this time. Retrying shortly…</p>}
               <ol className="rows">
                 {c.top.map((q, i) => (
                   <li key={q.symbol}>
