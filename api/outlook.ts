@@ -67,12 +67,11 @@ async function generate(symbol: string, category?: string): Promise<Outlook> {
     .join("\n");
 
   const client = new Anthropic({ apiKey });
-  const res = await client.beta.messages.create({
-    model: "claude-opus-5-5",
+  // Haiku keeps each outlook well under a cent; switch to "claude-sonnet-5-5" for deeper write-ups.
+  const res = await client.messages.create({
+    model: "claude-haiku-5-5",
     max_tokens: 16000,
-    betas: ["server-side-fallback-2026-07-01"],
-    fallbacks: "default",
-    output_config: { effort: "medium", format: { type: "json_schema", schema: SCHEMA } },
+    output_config: { effort: "low", format: { type: "json_schema", schema: SCHEMA } },
     system: SYSTEM,
     messages: [{ role: "user", content: prompt }],
   });

@@ -20,7 +20,7 @@ A mobile-first stock app (installable PWA) for iPhone and Android. No App Store 
 | API | Vercel Functions in `api/` that hide the keys and cache responses |
 | Prices, P/E, news | [Finnhub](https://finnhub.io) (free tier) |
 | 1-year history, description, cash | [Financial Modeling Prep](https://site.financialmodelingprep.com) (free tier) |
-| Outlook | Claude via the Anthropic API, cached 12 h per stock |
+| Outlook | Claude Haiku via the Anthropic API (well under 1¢ per outlook), cached 12 h per stock |
 
 Without keys (or when running `npm run dev`), the app shows clearly-labelled **sample data** so you can try the UI.
 
