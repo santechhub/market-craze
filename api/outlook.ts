@@ -1,7 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
-import type { Outlook } from "../src/lib/types";
-import { loadCompany } from "./company";
-import { cached, env, finnhub, handle, HttpError, json, symbolParam } from "./_lib/util";
+import type { Outlook } from "../src/lib/types.js";
+import { loadCompany } from "./company.js";
+import { cached, env, finnhub, handle, HttpError, json, symbolParam } from "./_lib/util.js";
 
 interface FhNews {
   headline: string;

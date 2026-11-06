@@ -1,6 +1,6 @@
-import { NAMES } from "../src/lib/categories";
-import type { Quote } from "../src/lib/types";
-import { cached, finnhub, handle, HttpError, json, pool } from "./_lib/util";
+import { NAMES } from "../src/lib/categories.js";
+import type { Quote } from "../src/lib/types.js";
+import { cached, finnhub, handle, HttpError, json, pool } from "./_lib/util.js";
 
 interface FhQuote {
   c: number;

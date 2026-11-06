@@ -1,6 +1,6 @@
-import { NAMES } from "../src/lib/categories";
-import type { CompanyDetail, NewsItem, PricePoint } from "../src/lib/types";
-import { cached, finnhub, fmp, handle, isoDaysAgo, json, symbolParam } from "./_lib/util";
+import { NAMES } from "../src/lib/categories.js";
+import type { CompanyDetail, NewsItem, PricePoint } from "../src/lib/types.js";
+import { cached, finnhub, fmp, handle, isoDaysAgo, json, symbolParam } from "./_lib/util.js";
 
 interface FhProfile {
   name?: string;

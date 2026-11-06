@@ -1,4 +1,4 @@
-import type { CategoryDef } from "./types";
+import type { CategoryDef } from "./types.js";
 
 // Candidate pool per category. The app ranks these by today's % change
 // and shows the top five. Edit freely.
