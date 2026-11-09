@@ -11,6 +11,14 @@ A mobile-first stock app (installable PWA) for iPhone and Android. No App Store 
 
 > Outlooks and signals are AI-generated estimates for information only. They are not financial advice.
 
+## US and India
+
+Use the **🇺🇸 US / 🇮🇳 India** switch at the top. India mode shows NSE stocks in the same sectors, prices in ₹, and keeps its own watchlist. India data: Upstox (prices, 1-year chart), Wikipedia (company background), Google News (headlines and outlook input). P/E, cash reserves and market cap aren't available for India on the free plan.
+
+Set `UPSTOX_ACCESS_TOKEN` in Vercel to turn India on (see `.env.example`).
+
+On Android, open the link in **Chrome** and tap **⬇ Install** (or ⋮ → Add to Home screen).
+
 ## How it works
 
 | Piece | Tech |

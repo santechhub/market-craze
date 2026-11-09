@@ -1,6 +1,6 @@
 // Deterministic sample data so the app works before API keys exist.
-import { CATEGORIES, NAMES } from "./categories";
-import type { CategoryTop, CompanyDetail, Outlook, PricePoint, Quote } from "./types";
+import { categoriesFor, namesFor } from "./categories";
+import type { CategoryTop, CompanyDetail, Outlook, PricePoint, Quote, Region } from "./types";
 
 function seeded(seed: string) {
   let h = 2166136261;
@@ -13,19 +13,19 @@ function seeded(seed: string) {
   };
 }
 
-export function mockQuote(symbol: string): Quote {
+export function mockQuote(symbol: string, region: Region = "us"): Quote {
   const r = seeded(symbol + new Date().toDateString());
-  const price = 20 + r() * 480;
+  const price = (20 + r() * 480) * (region === "in" ? 10 : 1);
   const changePct = (r() - 0.45) * 8;
-  return { symbol, name: NAMES[symbol] ?? symbol, price, change: (price * changePct) / 100, changePct };
+  return { symbol, name: namesFor(region)[symbol] ?? symbol, price, change: (price * changePct) / 100, changePct };
 }
 
-export function mockTop(): CategoryTop[] {
-  return CATEGORIES.map((c) => ({
+export function mockTop(region: Region = "us"): CategoryTop[] {
+  return categoriesFor(region).map((c) => ({
     id: c.id,
     name: c.name,
     emoji: c.emoji,
-    top: c.tickers.map(mockQuote).sort((a, b) => b.changePct - a.changePct).slice(0, 5),
+    top: c.tickers.map((s) => mockQuote(s, region)).sort((a, b) => b.changePct - a.changePct).slice(0, 5),
   }));
 }
 
@@ -45,13 +45,13 @@ function mockHistory(symbol: string, end: number): PricePoint[] {
   return pts.map((x) => ({ ...x, close: +(x.close * scale).toFixed(2) }));
 }
 
-export function mockCompany(symbol: string): CompanyDetail {
-  const q = mockQuote(symbol);
+export function mockCompany(symbol: string, region: Region = "us"): CompanyDetail {
+  const q = mockQuote(symbol, region);
   const r = seeded(symbol + "x");
   return {
     symbol,
-    name: NAMES[symbol] ?? symbol,
-    exchange: "NASDAQ",
+    name: namesFor(region)[symbol] ?? symbol,
+    exchange: region === "in" ? "NSE" : "NASDAQ",
     industry: "Sample industry",
     ipo: "1999-01-01",
     description:

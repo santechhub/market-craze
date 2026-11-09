@@ -1,6 +1,7 @@
-import { CATEGORIES, NAMES } from "../src/lib/categories.js";
+import { CATEGORIES, CATEGORIES_IN, NAMES } from "../src/lib/categories.js";
 import type { CategoryTop, Quote } from "../src/lib/types.js";
-import { cached, finnhub, handle, json, pool } from "./_lib/util.js";
+import { quotesIn } from "./_lib/india.js";
+import { cached, finnhub, handle, json, pool, regionParam } from "./_lib/util.js";
 
 interface FinnhubQuote {
   c: number; // current
@@ -10,8 +11,29 @@ interface FinnhubQuote {
 
 let lastGood: { at: number; data: CategoryTop[] } | null = null;
 
+function rank(cats: typeof CATEGORIES, bySymbol: Map<string, Quote>): CategoryTop[] {
+  return cats.map((c) => ({
+    id: c.id,
+    name: c.name,
+    emoji: c.emoji,
+    top: c.tickers
+      .map((s) => bySymbol.get(s))
+      .filter((q): q is Quote => !!q)
+      .sort((a, b) => b.changePct - a.changePct)
+      .slice(0, 5),
+  }));
+}
+
+async function topIndia() {
+  const symbols = [...new Set(CATEGORIES_IN.flatMap((c) => c.tickers))];
+  const quotes = await quotesIn(symbols); // one Upstox call for every sector
+  if (!quotes.length) throw new Error("No NSE quotes returned");
+  return rank(CATEGORIES_IN, new Map(quotes.map((q) => [q.symbol, q])));
+}
+
 // GET /api/top -> top five movers today per category.
-export const GET = handle(async () => {
+export const GET = handle(async (req) => {
+  if (regionParam(req) === "in") return json(await topIndia(), 120);
   if (lastGood && Date.now() - lastGood.at < 4 * 60_000) return json(lastGood.data, 300);
 
   const symbols = [...new Set(CATEGORIES.flatMap((c) => c.tickers))];
@@ -30,16 +52,7 @@ export const GET = handle(async () => {
   const bySymbol = new Map(quotes.filter((q): q is Quote => q !== null).map((q) => [q.symbol, q]));
   if (bySymbol.size === 0) throw new Error(`No quotes returned: ${firstError}`);
 
-  const data = CATEGORIES.map<CategoryTop>((c) => ({
-    id: c.id,
-    name: c.name,
-    emoji: c.emoji,
-    top: c.tickers
-      .map((s) => bySymbol.get(s))
-      .filter((q): q is Quote => !!q)
-      .sort((a, b) => b.changePct - a.changePct)
-      .slice(0, 5),
-  }));
+  const data = rank(CATEGORIES, bySymbol);
 
   // Only cache a complete answer for long; retry soon if some quotes were missing.
   const complete = bySymbol.size === symbols.length;

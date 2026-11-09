@@ -1,44 +1,50 @@
 import { useSyncExternalStore } from "react";
+import { getRegion, useRegion } from "./region";
+import type { Region } from "./types";
 
-// Watchlist lives on the device (localStorage). No account needed.
-const KEY = "mc.watchlist.v1";
+// One watchlist per market, stored on the device (localStorage). No account needed.
+const keyFor = (r: Region) => (r === "in" ? "mc.watchlist.in.v1" : "mc.watchlist.v1");
 const listeners = new Set<() => void>();
 
-function read(): string[] {
+function read(r: Region): string[] {
   try {
-    const v = JSON.parse(localStorage.getItem(KEY) ?? "[]");
+    const v = JSON.parse(localStorage.getItem(keyFor(r)) ?? "[]");
     return Array.isArray(v) ? v.filter((s) => typeof s === "string") : [];
   } catch {
     return [];
   }
 }
 
-let current = read();
+const lists: Record<Region, string[]> = { us: read("us"), in: read("in") };
 
 function write(next: string[]) {
-  current = next;
+  const r = getRegion();
+  lists[r] = next;
   try {
-    localStorage.setItem(KEY, JSON.stringify(next));
+    localStorage.setItem(keyFor(r), JSON.stringify(next));
   } catch {
     /* private mode: keep in memory */
   }
   listeners.forEach((l) => l());
 }
 
+const cur = () => lists[getRegion()];
+
 export const watchlist = {
-  get: () => current,
-  has: (s: string) => current.includes(s),
-  add: (s: string) => !current.includes(s) && write([...current, s]),
-  remove: (s: string) => write(current.filter((x) => x !== s)),
-  toggle: (s: string) => (current.includes(s) ? watchlist.remove(s) : watchlist.add(s)),
+  get: cur,
+  has: (s: string) => cur().includes(s),
+  add: (s: string) => !cur().includes(s) && write([...cur(), s]),
+  remove: (s: string) => write(cur().filter((x) => x !== s)),
+  toggle: (s: string) => (cur().includes(s) ? watchlist.remove(s) : watchlist.add(s)),
 };
 
 export function useWatchlist() {
+  const region = useRegion();
   return useSyncExternalStore(
     (cb) => {
       listeners.add(cb);
       return () => listeners.delete(cb);
     },
-    () => current,
+    () => lists[region],
   );
 }

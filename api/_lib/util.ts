@@ -96,7 +96,7 @@ export function handle(fn: (req: Request) => Promise<Response>) {
 
 export function symbolParam(req: Request) {
   const s = new URL(req.url).searchParams.get("symbol")?.toUpperCase() ?? "";
-  if (!/^[A-Z.-]{1,10}$/.test(s)) throw new HttpError(400, "invalid symbol");
+  if (!/^[A-Z0-9.&-]{1,20}$/.test(s)) throw new HttpError(400, "invalid symbol");
   return s;
 }
 
@@ -116,3 +116,6 @@ export async function pool<T, R>(items: T[], size: number, fn: (t: T) => Promise
   );
   return out;
 }
+
+export const regionParam = (req: Request): "us" | "in" =>
+  new URL(req.url).searchParams.get("region") === "in" ? "in" : "us";

@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { fetchOutlook, fetchQuotes } from "../lib/api";
 import { pct, usd } from "../lib/format";
 import type { Quote, Signal } from "../lib/types";
+import { useRegion } from "../lib/region";
 import { useWatchlist, watchlist } from "../lib/watchlist";
 import SampleBanner from "./SampleBanner";
 import SignalChip from "./SignalChip";
@@ -10,13 +11,14 @@ const ORDER: Record<Signal, number> = { buy: 0, hold: 1, sell: 2 };
 
 export default function Watchlist() {
   const list = useWatchlist();
+  const region = useRegion();
   const [quotes, setQuotes] = useState<Record<string, Quote>>({});
   const [signals, setSignals] = useState<Record<string, { signal: Signal; reason: string }>>({});
   const [sample, setSample] = useState(false);
   const [input, setInput] = useState("");
   const [error, setError] = useState("");
 
-  const key = list.join(",");
+  const key = region + ":" + list.join(",");
   useEffect(() => {
     if (!list.length) return;
     fetchQuotes(list).then((r) => {
@@ -35,7 +37,7 @@ export default function Watchlist() {
   const add = (e: FormEvent) => {
     e.preventDefault();
     const s = input.trim().toUpperCase();
-    if (!/^[A-Z.-]{1,10}$/.test(s)) return setError("Enter a US ticker, e.g. AAPL");
+    if (!/^[A-Z0-9.&-]{1,20}$/.test(s)) return setError(region === "in" ? "Enter an NSE symbol, e.g. TCS" : "Enter a US ticker, e.g. AAPL");
     setError("");
     watchlist.add(s);
     setInput("");
@@ -61,7 +63,7 @@ export default function Watchlist() {
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Add ticker (e.g. AAPL)"
+          placeholder={region === "in" ? "Add NSE symbol (e.g. TCS)" : "Add ticker (e.g. AAPL)"}
           autoCapitalize="characters"
           autoCorrect="off"
           enterKeyHint="done"
@@ -100,7 +102,7 @@ export default function Watchlist() {
                 const sig = signals[s];
                 return (
                   <li key={s} className="watch-row">
-                    <a className="row" href={`#/c/${s}`}>
+                    <a className="row" href={`#/c/${encodeURIComponent(s)}`}>
                       <span className="sym">
                         <strong>{s}</strong>
                         <span className="muted small ellipsis">{q?.name ?? ""}</span>

@@ -1,3 +1,5 @@
+export type Region = "us" | "in";
+
 export interface CategoryDef {
   id: string;
   name: string;

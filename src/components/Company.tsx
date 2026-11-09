@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { fetchCompany, fetchOutlook } from "../lib/api";
-import { CATEGORIES, categoryOf } from "../lib/categories";
+import { categoriesFor, categoryOf } from "../lib/categories";
+import { useRegion } from "../lib/region";
 import { big, pct, usd } from "../lib/format";
 import type { CompanyDetail, Outlook } from "../lib/types";
 import { useWatchlist, watchlist } from "../lib/watchlist";
@@ -24,7 +25,8 @@ export default function Company({ symbol, categoryId }: { symbol: string; catego
 
   const list = useWatchlist();
   const watched = list.includes(symbol);
-  const category = CATEGORIES.find((x) => x.id === categoryId) ?? categoryOf(symbol);
+  const region = useRegion();
+  const category = categoriesFor(region).find((x) => x.id === categoryId) ?? categoryOf(symbol, region);
 
   useEffect(() => {
     let alive = true;
@@ -39,7 +41,7 @@ export default function Company({ symbol, categoryId }: { symbol: string; catego
     return () => {
       alive = false;
     };
-  }, [symbol, category?.name]);
+  }, [symbol, category?.name, region]);
 
   const series = useMemo(() => {
     if (!c) return [];
@@ -139,9 +141,17 @@ export default function Company({ symbol, categoryId }: { symbol: string; catego
           </section>
 
           <section className="stats">
-            <Stat label="P/E ratio (TTM)" value={c.peRatio != null ? c.peRatio.toFixed(1) : "—"} />
+            <Stat
+              label="P/E ratio (TTM)"
+              value={c.peRatio != null ? c.peRatio.toFixed(1) : "—"}
+              hint={c.peRatio == null && region === "in" ? "not on free plan" : undefined}
+            />
             <Stat label="Cash reserves" value={big(c.cash)} hint={c.cashAsOf} />
-            <Stat label="Market cap" value={big(c.marketCap)} />
+            <Stat
+              label="Market cap"
+              value={big(c.marketCap)}
+              hint={c.marketCap == null && region === "in" ? "not on free plan" : undefined}
+            />
             <Stat label="1Y range" value={rangeText(c)} />
           </section>
 

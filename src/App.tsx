@@ -20,11 +20,11 @@ function useRoute() {
 
 export default function App() {
   const hash = useRoute();
-  const m = hash.match(/^#\/c\/([A-Za-z.-]+)(?:\?cat=([\w-]+))?/);
+  const m = hash.match(/^#\/c\/([A-Za-z0-9.&%-]+)(?:\?cat=([\w-]+))?/);
   if (m)
     return (
       <Suspense fallback={<p className="muted center page">Loading…</p>}>
-        <Company symbol={m[1].toUpperCase()} categoryId={m[2]} />
+        <Company symbol={decodeURIComponent(m[1]).toUpperCase()} categoryId={m[2]} />
       </Suspense>
     );
   return <Home tab={hash.startsWith("#/watchlist") ? "watchlist" : "sectors"} />;

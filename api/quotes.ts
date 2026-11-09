@@ -1,6 +1,7 @@
 import { NAMES } from "../src/lib/categories.js";
 import type { Quote } from "../src/lib/types.js";
-import { cached, finnhub, handle, HttpError, json, pool } from "./_lib/util.js";
+import { quotesIn } from "./_lib/india.js";
+import { cached, finnhub, handle, HttpError, json, pool, regionParam } from "./_lib/util.js";
 
 interface FhQuote {
   c: number;
@@ -14,8 +15,9 @@ interface FhProfile {
 // GET /api/quotes?symbols=NVDA,AAPL -> quotes for the watchlist (max 30).
 export const GET = handle(async (req) => {
   const raw = new URL(req.url).searchParams.get("symbols") ?? "";
-  const symbols = [...new Set(raw.toUpperCase().split(",").filter((s) => /^[A-Z.-]{1,10}$/.test(s)))].slice(0, 30);
+  const symbols = [...new Set(raw.toUpperCase().split(",").filter((s) => /^[A-Z0-9.&-]{1,20}$/.test(s)))].slice(0, 30);
   if (!symbols.length) throw new HttpError(400, "no symbols");
+  if (regionParam(req) === "in") return json(await quotesIn(symbols), 60);
 
   const quotes = await pool(symbols, 6, async (symbol): Promise<Quote | null> => {
     try {

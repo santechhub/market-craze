@@ -1,6 +1,7 @@
 import { NAMES } from "../src/lib/categories.js";
 import type { CompanyDetail, NewsItem, PricePoint } from "../src/lib/types.js";
-import { cached, finnhub, fmp, handle, isoDaysAgo, json, symbolParam } from "./_lib/util.js";
+import { loadCompanyIn } from "./_lib/india.js";
+import { cached, finnhub, fmp, handle, isoDaysAgo, json, regionParam, symbolParam } from "./_lib/util.js";
 
 interface FhProfile {
   name?: string;
@@ -95,4 +96,7 @@ export async function loadCompany(symbol: string): Promise<CompanyDetail> {
 }
 
 // GET /api/company?symbol=NVDA
-export const GET = handle(async (req) => json(await loadCompany(symbolParam(req)), 120));
+export const GET = handle(async (req) => {
+  const symbol = symbolParam(req);
+  return json(regionParam(req) === "in" ? await loadCompanyIn(symbol) : await loadCompany(symbol), 120);
+});

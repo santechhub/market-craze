@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { fetchTop } from "../lib/api";
 import { pct, usd } from "../lib/format";
 import type { CategoryTop } from "../lib/types";
+import { setRegion, useRegion } from "../lib/region";
 import { useWatchlist } from "../lib/watchlist";
+import InstallButton from "./InstallButton";
 import SampleBanner from "./SampleBanner";
 import Watchlist from "./Watchlist";
 
@@ -13,6 +15,7 @@ export default function Home({ tab }: { tab: Tab }) {
   const [sample, setSample] = useState(false);
   const [updated, setUpdated] = useState<Date | null>(null);
   const list = useWatchlist();
+  const region = useRegion();
 
   const load = () =>
     fetchTop().then((r) => {
@@ -22,10 +25,11 @@ export default function Home({ tab }: { tab: Tab }) {
     });
 
   useEffect(() => {
+    setCats(null);
     load();
     const t = setInterval(load, 60_000);
     return () => clearInterval(t);
-  }, []);
+  }, [region]);
 
   return (
     <main className="page with-tabs">
@@ -45,6 +49,18 @@ export default function Home({ tab }: { tab: Tab }) {
         )}
       </header>
 
+      <div className="region-row">
+        <div className="seg region" role="tablist" aria-label="Market">
+          <button className={region === "us" ? "on" : ""} onClick={() => setRegion("us")}>
+            🇺🇸 US
+          </button>
+          <button className={region === "in" ? "on" : ""} onClick={() => setRegion("in")}>
+            🇮🇳 India
+          </button>
+        </div>
+        <InstallButton />
+      </div>
+
       {tab === "watchlist" ? (
         <Watchlist />
       ) : (
@@ -60,7 +76,7 @@ export default function Home({ tab }: { tab: Tab }) {
               <ol className="rows">
                 {c.top.map((q, i) => (
                   <li key={q.symbol}>
-                    <a className="row" href={`#/c/${q.symbol}?cat=${c.id}`}>
+                    <a className="row" href={`#/c/${encodeURIComponent(q.symbol)}?cat=${c.id}`}>
                       <span className="rank">{i + 1}</span>
                       <span className="sym">
                         <strong>
@@ -80,7 +96,7 @@ export default function Home({ tab }: { tab: Tab }) {
             </section>
           ))}
           <footer className="muted small center foot">
-            Data: Finnhub &amp; Financial Modeling Prep. Not financial advice.
+            {region === "in" ? "Data: Upstox (NSE), Wikipedia, Google News." : "Data: Finnhub & Financial Modeling Prep."} Not financial advice.
           </footer>
         </>
       )}
