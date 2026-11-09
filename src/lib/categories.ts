@@ -1,16 +1,18 @@
 import type { CategoryDef } from "./types.js";
 
 // Candidate pool per category. The app ranks these by today's % change
-// and shows the top five. Edit freely.
+// and shows the top five. Keep the total under ~55 tickers: Finnhub's free
+// tier allows 60 calls/minute and the sector list makes one call per ticker.
 export const CATEGORIES: CategoryDef[] = [
-  { id: "ai", name: "AI", emoji: "🤖", tickers: ["NVDA", "MSFT", "GOOGL", "META", "AMD", "PLTR", "AVGO"] },
-  { id: "datacenter", name: "Data Storage & Data Centers", emoji: "🗄️", tickers: ["EQIX", "DLR", "STX", "WDC", "NTAP", "PSTG", "SMCI"] },
-  { id: "energy", name: "Energy", emoji: "⚡", tickers: ["XOM", "CVX", "NEE", "COP", "VST", "CEG", "SLB"] },
-  { id: "cyber", name: "Cyber Security", emoji: "🛡️", tickers: ["CRWD", "PANW", "FTNT", "ZS", "NET", "OKTA", "S"] },
-  { id: "defense", name: "Defense", emoji: "🎖️", tickers: ["LMT", "RTX", "NOC", "GD", "LHX", "HII", "KTOS"] },
-  { id: "realestate", name: "Real Estate", emoji: "🏢", tickers: ["PLD", "AMT", "O", "SPG", "WELL", "PSA", "CBRE"] },
-  { id: "ecommerce", name: "E-commerce", emoji: "🛒", tickers: ["AMZN", "SHOP", "MELI", "EBAY", "ETSY", "PDD", "W"] },
-  { id: "it", name: "IT Services", emoji: "💻", tickers: ["ACN", "IBM", "ORCL", "CRM", "NOW", "CTSH", "INFY"] },
+  { id: "ai", name: "AI", emoji: "🤖", tickers: ["NVDA", "MSFT", "GOOGL", "META", "AMD", "PLTR"] },
+  { id: "datacenter", name: "Data Storage & Data Centers", emoji: "🗄️", tickers: ["EQIX", "DLR", "STX", "WDC", "NTAP", "SMCI"] },
+  { id: "energy", name: "Energy", emoji: "⚡", tickers: ["XOM", "CVX", "NEE", "COP", "VST", "CEG"] },
+  { id: "cyber", name: "Cyber Security", emoji: "🛡️", tickers: ["CRWD", "PANW", "FTNT", "ZS", "NET", "OKTA"] },
+  { id: "defense", name: "Defense", emoji: "🎖️", tickers: ["LMT", "RTX", "NOC", "GD", "LHX", "HII"] },
+  { id: "realestate", name: "Real Estate", emoji: "🏢", tickers: ["PLD", "AMT", "O", "SPG", "WELL", "CBRE"] },
+  { id: "ecommerce", name: "E-commerce", emoji: "🛒", tickers: ["AMZN", "SHOP", "MELI", "EBAY", "ETSY", "PDD"] },
+  { id: "gaming", name: "Gaming", emoji: "🎮", tickers: ["RBLX", "EA", "TTWO", "NTES", "SONY", "U"] },
+  { id: "it", name: "IT Services", emoji: "💻", tickers: ["ACN", "IBM", "ORCL", "CRM", "NOW", "INFY"] },
 ];
 
 // Display names, so the top-5 lists need only one quote call per ticker.
@@ -25,7 +27,8 @@ export const NAMES: Record<string, string> = {
   O: "Realty Income", SPG: "Simon Property", WELL: "Welltower", PSA: "Public Storage", CBRE: "CBRE Group",
   AMZN: "Amazon", SHOP: "Shopify", MELI: "MercadoLibre", EBAY: "eBay", ETSY: "Etsy", PDD: "PDD Holdings",
   W: "Wayfair", ACN: "Accenture", IBM: "IBM", ORCL: "Oracle", CRM: "Salesforce", NOW: "ServiceNow",
-  CTSH: "Cognizant", INFY: "Infosys",
+  CTSH: "Cognizant", INFY: "Infosys", RBLX: "Roblox", EA: "Electronic Arts", TTWO: "Take-Two Interactive",
+  NTES: "NetEase", SONY: "Sony Group", U: "Unity Software",
 };
 
 export const categoryOf = (symbol: string) =>

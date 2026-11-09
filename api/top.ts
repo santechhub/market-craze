@@ -19,7 +19,7 @@ export const GET = handle(async () => {
   const quotes = await pool(symbols, 4, async (symbol): Promise<Quote | null> => {
     try {
       // Per-symbol cache, shared with /api/quotes, so a partial failure only re-fetches the missing ones.
-      const q = await cached(`quote:${symbol}`, 2 * 60_000, () => finnhub<FinnhubQuote>("/quote", { symbol }));
+      const q = await cached(`quote:${symbol}`, 4 * 60_000, () => finnhub<FinnhubQuote>("/quote", { symbol }));
       if (!q.c) return null;
       return { symbol, name: NAMES[symbol] ?? symbol, price: q.c, change: q.d ?? 0, changePct: q.dp ?? 0 };
     } catch (e) {
