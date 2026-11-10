@@ -1,18 +1,18 @@
 import type { CategoryDef, Region } from "./types.js";
 
-// Candidate pool per category. Five per sector, ranked by today's % change
-// Keep the total under ~55 tickers: Finnhub's free
-// tier allows 60 calls/minute and the sector list makes one call per ticker.
+// US: eight per sector, ranked by analyst consensus (top 3 / bottom 2 shown).
+// Ratings are fetched once a day (see api/ratings.ts); quotes only for the 5 shown,
+// so request counts stay inside Finnhub's free 60 calls/minute.
 export const CATEGORIES: CategoryDef[] = [
-  { id: "ai", name: "AI", emoji: "🤖", tickers: ["NVDA", "MSFT", "GOOGL", "META", "AMD"] },
-  { id: "datacenter", name: "Data Storage & Data Centers", emoji: "🗄️", tickers: ["EQIX", "DLR", "STX", "WDC", "NTAP"] },
-  { id: "energy", name: "Energy", emoji: "⚡", tickers: ["XOM", "CVX", "NEE", "COP", "VST"] },
-  { id: "cyber", name: "Cyber Security", emoji: "🛡️", tickers: ["CRWD", "PANW", "FTNT", "ZS", "NET"] },
-  { id: "defense", name: "Defense", emoji: "🎖️", tickers: ["LMT", "RTX", "NOC", "GD", "LHX"] },
-  { id: "realestate", name: "Real Estate", emoji: "🏢", tickers: ["PLD", "AMT", "O", "SPG", "WELL"] },
-  { id: "ecommerce", name: "E-commerce", emoji: "🛒", tickers: ["AMZN", "SHOP", "MELI", "EBAY", "ETSY"] },
-  { id: "gaming", name: "Gaming", emoji: "🎮", tickers: ["RBLX", "EA", "TTWO", "NTES", "SONY"] },
-  { id: "it", name: "IT Services", emoji: "💻", tickers: ["ACN", "IBM", "ORCL", "CRM", "NOW"] },
+  { id: "ai", name: "AI", emoji: "🤖", tickers: ["NVDA", "MSFT", "GOOGL", "META", "AMD", "PLTR", "AVGO", "SNOW"] },
+  { id: "datacenter", name: "Data Storage & Data Centers", emoji: "🗄️", tickers: ["EQIX", "DLR", "STX", "WDC", "NTAP", "PSTG", "SMCI", "IRM"] },
+  { id: "energy", name: "Energy", emoji: "⚡", tickers: ["XOM", "CVX", "NEE", "COP", "VST", "CEG", "SLB", "EOG"] },
+  { id: "cyber", name: "Cyber Security", emoji: "🛡️", tickers: ["CRWD", "PANW", "FTNT", "ZS", "NET", "OKTA", "S", "QLYS"] },
+  { id: "defense", name: "Defense", emoji: "🎖️", tickers: ["LMT", "RTX", "NOC", "GD", "LHX", "HII", "KTOS", "LDOS"] },
+  { id: "realestate", name: "Real Estate", emoji: "🏢", tickers: ["PLD", "AMT", "O", "SPG", "WELL", "PSA", "CBRE", "EQR"] },
+  { id: "ecommerce", name: "E-commerce", emoji: "🛒", tickers: ["AMZN", "SHOP", "MELI", "EBAY", "ETSY", "PDD", "W", "BABA"] },
+  { id: "gaming", name: "Gaming", emoji: "🎮", tickers: ["RBLX", "TTWO", "NTES", "SONY", "U", "PLTK", "SE", "GME"] },
+  { id: "it", name: "IT Services", emoji: "💻", tickers: ["ACN", "IBM", "ORCL", "CRM", "NOW", "CTSH", "INFY", "EPAM"] },
 ];
 
 // Display names, so the top-5 lists need only one quote call per ticker.
@@ -28,7 +28,9 @@ export const NAMES: Record<string, string> = {
   AMZN: "Amazon", SHOP: "Shopify", MELI: "MercadoLibre", EBAY: "eBay", ETSY: "Etsy", PDD: "PDD Holdings",
   W: "Wayfair", ACN: "Accenture", IBM: "IBM", ORCL: "Oracle", CRM: "Salesforce", NOW: "ServiceNow",
   CTSH: "Cognizant", INFY: "Infosys", RBLX: "Roblox", EA: "Electronic Arts", TTWO: "Take-Two Interactive",
-  NTES: "NetEase", SONY: "Sony Group", U: "Unity Software",
+  NTES: "NetEase", SONY: "Sony Group", U: "Unity Software", SNOW: "Snowflake", IRM: "Iron Mountain",
+  EOG: "EOG Resources", QLYS: "Qualys", LDOS: "Leidos", EQR: "Equity Residential", BABA: "Alibaba",
+  PLTK: "Playtika", SE: "Sea Limited", GME: "GameStop", EPAM: "EPAM Systems",
 };
 
 // India (NSE symbols). Data via Upstox, so no Finnhub call limit applies here.

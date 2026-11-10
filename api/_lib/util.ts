@@ -45,25 +45,26 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 // Finnhub free tier allows 60 calls/min and 30 calls/sec. Space calls out and retry on 429.
 let nextSlot = 0;
-async function finnhubSlot() {
+async function finnhubSlot(gapMs: number) {
   const now = Date.now();
   const wait = Math.max(0, nextSlot - now);
-  nextSlot = Math.max(now, nextSlot) + 80; // ~12 calls/sec
+  nextSlot = Math.max(now, nextSlot) + gapMs;
   if (wait) await sleep(wait);
 }
 
 export const FINNHUB = "https://finnhub.io/api/v1";
 export const FMP = "https://financialmodelingprep.com/stable";
 
-export async function finnhub<T>(path: string, params: Record<string, string>): Promise<T> {
+/** gapMs: spacing between calls. 80ms (~12/s) for small bursts; ~1050ms for big batches (stays under 60/min). */
+export async function finnhub<T>(path: string, params: Record<string, string>, gapMs = 80): Promise<T> {
   const url = `${FINNHUB}${path}?${new URLSearchParams({ ...params, token: env("FINNHUB_API_KEY") })}`;
   for (let attempt = 0; ; attempt++) {
-    await finnhubSlot();
+    await finnhubSlot(gapMs);
     try {
       return await getJson<T>(url);
     } catch (e) {
-      if (e instanceof UpstreamError && e.upstreamStatus === 429 && attempt < 3) {
-        await sleep(1200 * (attempt + 1));
+      if (e instanceof UpstreamError && e.upstreamStatus === 429 && attempt < 5) {
+        await sleep([2000, 4000, 8000, 15000, 20000][attempt]); // waits out the per-minute window
         continue;
       }
       throw e;

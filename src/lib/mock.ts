@@ -20,13 +20,25 @@ export function mockQuote(symbol: string, region: Region = "us"): Quote {
   return { symbol, name: namesFor(region)[symbol] ?? symbol, price, change: (price * changePct) / 100, changePct };
 }
 
+const LABELS = ["Strong Buy", "Buy", "Hold", "Sell", "Strong Sell"] as const;
+
 export function mockTop(region: Region = "us"): CategoryTop[] {
-  return categoriesFor(region).map((c) => ({
-    id: c.id,
-    name: c.name,
-    emoji: c.emoji,
-    top: c.tickers.map((s) => mockQuote(s, region)).sort((a, b) => b.changePct - a.changePct).slice(0, 5),
-  }));
+  return categoriesFor(region).map((c) => {
+    if (region === "in") {
+      const top = c.tickers.map((s) => mockQuote(s, region)).sort((a, b) => b.changePct - a.changePct).slice(0, 5);
+      return { id: c.id, name: c.name, emoji: c.emoji, top };
+    }
+    const rated = c.tickers
+      .map((s) => {
+        const score = +(seeded(s + "r")() * 3.2 - 1.2).toFixed(2);
+        const idx = score >= 1.2 ? 0 : score >= 0.5 ? 1 : score > -0.5 ? 2 : score > -1.2 ? 3 : 4;
+        return { ...mockQuote(s), rating: { label: LABELS[idx], score, analysts: 20 + Math.round(score * 5 + 10) } };
+      })
+      .sort((a, b) => b.rating.score - a.rating.score);
+    const buy = rated.slice(0, 3);
+    const sell = rated.slice(3).slice(-2).reverse();
+    return { id: c.id, name: c.name, emoji: c.emoji, top: [...buy, ...sell], picks: { buy, sell } };
+  });
 }
 
 function mockHistory(symbol: string, end: number): PricePoint[] {

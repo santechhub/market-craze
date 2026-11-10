@@ -13,13 +13,25 @@ export interface Quote {
   price: number;
   change: number;
   changePct: number;
+  /** Wall Street analyst consensus (US only). */
+  rating?: Rating;
+}
+
+export interface Rating {
+  label: "Strong Buy" | "Buy" | "Hold" | "Sell" | "Strong Sell";
+  /** -2 (all strong sell) .. +2 (all strong buy) */
+  score: number;
+  analysts: number;
 }
 
 export interface CategoryTop {
   id: string;
   name: string;
   emoji: string;
+  /** India: top 5 movers today. */
   top: Quote[];
+  /** US: 3 best- and 2 worst-rated stocks by analyst consensus. */
+  picks?: { buy: Quote[]; sell: Quote[] };
 }
 
 export interface PricePoint {
